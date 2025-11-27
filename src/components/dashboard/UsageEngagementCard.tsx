@@ -22,6 +22,19 @@ type UsagePoint = {
 };
 
 const UsageEngagementCard: React.FC<Props> = ({ dateRange }) => {
+  const rangeLabel = useMemo(() => {
+    switch (dateRange) {
+      case "last_7_days":
+        return "Last 7 Days";
+      case "this_month":
+        return "This Month";
+      case "this_quarter":
+        return "This Quarter";
+      case "last_30_days":
+      default:
+        return "Last 30 Days";
+    }
+  }, [dateRange]);
   // Demo data – you can branch on dateRange later if you want
   const data: UsagePoint[] = useMemo(
     () => [
@@ -76,7 +89,7 @@ const UsageEngagementCard: React.FC<Props> = ({ dateRange }) => {
           893
         </span>
         <span className="text-xs text-gray-500">
-          Last 30 Days{" "}
+          {rangeLabel}{" "}
           <span className="font-medium text-emerald-600">
             +2.5%
           </span>
