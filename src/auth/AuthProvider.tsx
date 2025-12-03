@@ -1,12 +1,16 @@
 import React from "react";
 
+type Role = "superadmin" | "support";
+
 type User = {
   email: string;
+  role: Role;
 };
 
 type AuthContextValue = {
   user: User | null;
-  login: (email: string, password?: string) => Promise<void>;
+  login: (email: string, role?: Role, password?: string) => Promise<void>;
+  updateProfile: (patch: Partial<User>) => void;
   logout: () => void;
 };
 
@@ -28,13 +32,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   });
 
-  const login = async (email: string) => {
-    // In a real app you'd call your API here. This is a minimal stub.
-    const next: User = { email };
+  const login = async (email: string, role: Role = "superadmin") => {
+    // In a real app you'd call your API here and receive the user's role.
+    const next: User = { email, role };
     setUser(next);
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
     } catch {}
+  };
+
+  const updateProfile = (patch: Partial<User>) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const next = { ...prev, ...patch };
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
   };
 
   const logout = () => {
@@ -44,7 +59,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     } catch {}
   };
 
-  const value = React.useMemo(() => ({ user, login, logout }), [user]);
+  const value = React.useMemo(() => ({ user, login, updateProfile, logout }), [user]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

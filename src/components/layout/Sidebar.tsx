@@ -7,21 +7,18 @@ import {
   FiFileText,
   FiSettings,
   FiBookOpen,
-//   FiHelpCircle,
+  FiHelpCircle,
   FiLogOut,
 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../auth/AuthProvider";
 
 const LogoutButton: React.FC<{ variant: SidebarVariant; onClose?: () => void }> = ({ variant, onClose }) => {
-  // `useAuth` throws if there is no AuthProvider in the tree. Wrap in try/catch
-  // so the Sidebar can be rendered in contexts where AuthProvider isn't mounted
-  // (e.g. during early app boot or in storybook). Fallback to a no-op.
-  let auth: { logout: () => void } | null = null;
+ let auth: { logout: () => void } | null = null;
   try {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     auth = useAuth();
-  } catch (e) {
+  } catch {
     auth = null;
   }
 
@@ -31,9 +28,7 @@ const LogoutButton: React.FC<{ variant: SidebarVariant; onClose?: () => void }> 
     try {
       auth?.logout();
     } catch (err) {
-      // swallow errors from logout to avoid crashing the UI
-      // (real apps may want to surface this to monitoring)
-      // eslint-disable-next-line no-console
+
       console.warn("Logout failed", err);
     }
     if (variant === "overlay" && onClose) onClose();
@@ -66,11 +61,22 @@ const navItems = [
   { name: "Analytics", icon: FiBarChart2, to: "/analytics" },
   { name: "Reports", icon: FiFileText, to: "/reports" },
   { name: "Content Control", icon: FiBookOpen, to: "/content-control" },
+  { name: "Support", icon: FiHelpCircle, to: "/support" },
   { name: "Settings", icon: FiSettings, to: "/settings" },
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({ variant, open, onClose }) => {
   const location = useLocation();
+  // Read current user role to conditionally show nav items
+  let userRole: "superadmin" | "support" | null = null;
+  try {
+ 
+    const auth = useAuth();
+    const role = auth.user?.role;
+    userRole = role === "superadmin" || role === "support" ? role : null;
+  } catch {
+    userRole = null;
+  }
 
   const content = (
     <aside className="flex h-full w-64 flex-col bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 px-4 py-4 shadow-sm">
@@ -89,26 +95,35 @@ const Sidebar: React.FC<SidebarProps> = ({ variant, open, onClose }) => {
 
       {/* Nav items */}
       <nav className="flex-1 space-y-1">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const active = location.pathname === item.to;
+        {navItems
+          .filter((it) => {
+            // If user role is support, only show Support and Help
+            if (userRole === "support") {
+              return it.to === "/support";
+            }
+            // Otherwise show all
+            return true;
+          })
+          .map((item) => {
+            const Icon = item.icon;
+            const active = location.pathname === item.to;
 
-          return (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
-                active
-                  ? "bg-[#FDF3D7] text-gray-900 dark:bg-[#3b2c23] dark:text-white"
-                  : "text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
-              }`}
-              onClick={variant === "overlay" ? onClose : undefined}
-            >
-              <Icon className="h-4 w-4 text-gray-600 dark:text-gray-300" />
-              <span>{item.name}</span>
-            </NavLink>
-          );
-        })}
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
+                  active
+                    ? "bg-[#FDF3D7] text-gray-900 dark:bg-[#3b2c23] dark:text-white"
+                    : "text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800"
+                }`}
+                onClick={variant === "overlay" ? onClose : undefined}
+              >
+                <Icon className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+                <span>{item.name}</span>
+              </NavLink>
+            );
+          })}
       </nav>
 
       {/* Help link at bottom */}

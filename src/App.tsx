@@ -10,6 +10,8 @@ import ReportsPage from "./pages/reports/ReportsPage";
 import ContentControlPage from "./pages/content/ContentControlPage";
 import SettingsPage from "./pages/settings/SettingsPage";
 import HelpPage from "./pages/help/HelpPage";
+import SupportPage from "./pages/support/SupportPage";
+import RequireRole from "./auth/RequireRole";
 
 const App: React.FC = () => {
   return (
@@ -20,12 +22,13 @@ const App: React.FC = () => {
           {/* default -> dashboard */}
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<DashboardPage />} />
-          <Route path="users" element={<UsersPage />} />
-          <Route path="analytics" element={<AnalyticsPage />} />
-          <Route path="reports" element={<ReportsPage />} />
-          <Route path="content-control" element={<ContentControlPage />} />
-          <Route path="settings" element={<SettingsPage />} />
-          <Route path="help" element={<HelpPage />} />
+          <Route path="users" element={<RequireRole allowed={["superadmin"]}><UsersPage /></RequireRole>} />
+          <Route path="analytics" element={<RequireRole allowed={["superadmin"]}><AnalyticsPage /></RequireRole>} />
+          <Route path="reports" element={<RequireRole allowed={["superadmin"]}><ReportsPage /></RequireRole>} />
+          <Route path="content-control" element={<RequireRole allowed={["superadmin"]}><ContentControlPage /></RequireRole>} />
+          <Route path="settings" element={<RequireRole allowed={["superadmin"]}><SettingsPage /></RequireRole>} />
+          <Route path="help" element={<RequireRole allowed={["superadmin"]}><HelpPage /></RequireRole>} />
+          <Route path="support" element={<RequireRole allowed={["superadmin","support"]}><SupportPage /></RequireRole>} />
         </Route>
         {/* Fallback for unknown routes: send to dashboard */}
         <Route path="*" element={<Navigate to="/dashboard" replace />} />

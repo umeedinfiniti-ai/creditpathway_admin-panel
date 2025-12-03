@@ -22,12 +22,13 @@ const SelectFilter: React.FC<SelectFilterProps> = ({
   return (
     <div
       className={cn(
-        "relative inline-flex items-center rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-700 shadow-sm sm:text-sm dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200",
+        "relative inline-flex items-center rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-700 shadow-sm sm:text-sm dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200 overflow-hidden",
         className
       )}
     >
       <select
-        className="peer w-full appearance-none bg-transparent pr-5 text-xs font-medium text-gray-800 focus:outline-none sm:text-sm dark:text-white"
+        className="peer w-full h-full rounded-xl appearance-none bg-inherit pr-8 text-xs font-medium text-gray-800 focus:outline-none sm:text-sm dark:text-gray-200"
+        style={{ WebkitAppearance: "none", MozAppearance: "none", backgroundClip: "padding-box" }}
         value={value ?? ""}
         onChange={(e) =>
           onChange(e.target.value === "" ? null : e.target.value)

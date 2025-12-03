@@ -18,32 +18,66 @@ type Props = {
 
 type Point = { label: string; value: number };
 
-const DailyActiveUsersCard: React.FC<Props> = () => {
-  const data: Point[] = useMemo(
-    () => [
-      { label: "Mon", value: 1200 },
-      { label: "Tue", value: 1400 },
-      { label: "Wed", value: 1350 },
-      { label: "Thu", value: 1500 },
-      { label: "Fri", value: 1600 },
-      { label: "Sat", value: 1300 },
-      { label: "Sun", value: 1482 },
-    ],
-    []
-  );
+const DailyActiveUsersCard: React.FC<Props> = ({ range }) => {
+  const { data, subtitle, value, change } = React.useMemo(() => {
+    // Determine number of points for the selected range
+    const points = (() => {
+      switch (range) {
+        case "last_7_days":
+          return 7;
+        case "last_30_days":
+          return 30;
+        case "this_month": {
+          const now = new Date();
+          return new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+        }
+        case "this_quarter":
+          return 90;
+        case "custom":
+        default:
+          return 7;
+      }
+    })();
+
+    // generate labels (recent -> older)
+    const labels: string[] = [];
+    for (let i = points - 1; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      // short label for readability
+      labels.push(`${d.getMonth() + 1}/${d.getDate()}`);
+    }
+
+    // synthetic values (simple sine-ish + noise) for demo
+    const generated: Point[] = labels.map((lbl, idx) => ({
+      label: lbl,
+      value: Math.round(900 + Math.sin(idx / Math.max(3, points / 7)) * 400 + Math.random() * 200),
+    }));
+
+    // show current value as last point and change vs previous
+    const last = generated[generated.length - 1];
+    const prev = generated[generated.length - 2] || last;
+    const pct = prev.value ? Math.round(((last.value - prev.value) / prev.value) * 1000) / 10 : 0;
+
+    const subtitleLabel =
+      range === "last_7_days"
+        ? "Last 7 days"
+        : range === "last_30_days"
+        ? "Last 30 days"
+        : range === "this_month"
+        ? "This month"
+        : range === "this_quarter"
+        ? "This quarter"
+        : "Custom range";
+
+    return { data: generated, subtitle: subtitleLabel, value: last.value.toLocaleString(), change: pct };
+  }, [range]);
 
   return (
-    <SectionCard
-      title="Daily Active Users (DAU)"
-      subtitle="vs. last 7 days"
-    >
+    <SectionCard title="Daily Active Users (DAU)" subtitle={`vs. ${subtitle}`}>
       <div className="mb-3 flex items-baseline gap-2">
-        <span className="text-2xl font-semibold text-gray-900">
-          1,482
-        </span>
-        <span className="text-xs text-emerald-600">
-          +5.4%
-        </span>
+        <span className="text-2xl font-semibold text-gray-900 dark:text-gray-100">{value}</span>
+        <span className={`text-xs ${change >= 0 ? "text-emerald-600" : "text-rose-500"}`}>{change >= 0 ? `+${change}%` : `${change}%`}</span>
       </div>
       <div className="h-44 w-full">
         <ResponsiveContainer width="100%" height="100%">

@@ -1,6 +1,9 @@
 import React from "react";
 import { FiBell, FiUser, FiMenu, FiSun, FiMoon } from "react-icons/fi";
 import useTheme from "../../hooks/useTheme";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../auth/AuthProvider";
+import ProfileModal from "../../auth/ProfileModal";
 
 interface TopbarProps {
   pageTitle: string;
@@ -8,8 +11,30 @@ interface TopbarProps {
 }
 
 const Topbar: React.FC<TopbarProps> = ({ pageTitle, onOpenSidebar }) => {
+  const navigate = useNavigate();
+  const { user } = (() => {
+    try {
+      // avoid hook error if AuthProvider isn't mounted
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      return useAuth();
+    } catch (e) {
+      return { user: null } as any;
+    }
+  })();
+
+  const [profileOpen, setProfileOpen] = React.useState(false);
+
+  const handleProfileClick = () => {
+    if (user?.role === "support") {
+      setProfileOpen(true);
+    } else {
+      navigate("/settings");
+    }
+  };
+
   return (
-    <header className="flex items-center justify-between bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 px-4 py-3 sm:px-6">
+    <>
+      <header className="flex items-center justify-between bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 px-4 py-3 sm:px-6">
       {/* Left: mobile menu + breadcrumb */}
       <div className="flex items-center gap-3">
         {/* Mobile menu button */}
@@ -42,13 +67,17 @@ const Topbar: React.FC<TopbarProps> = ({ pageTitle, onOpenSidebar }) => {
         </button>
         <button
           type="button"
+          onClick={handleProfileClick}
           className="flex h-9 w-9 items-center justify-center rounded-full bg-[#E6D3BF] sm:h-10 sm:w-10 dark:bg-[#3b2c23]"
           aria-label="Account"
         >
           <FiUser className="h-4 w-4 text-white sm:h-5 sm:w-5" />
         </button>
       </div>
-    </header>
+      </header>
+
+      <ProfileModal open={profileOpen} onClose={() => setProfileOpen(false)} />
+    </>
   );
 };
 
