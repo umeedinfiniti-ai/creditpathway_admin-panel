@@ -1,5 +1,5 @@
 // src/components/analytics/DailyActiveUsersCard.tsx
-import React, { useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import SectionCard from "../shared/layout/SectionCard";
 import {
   LineChart,
@@ -19,6 +19,20 @@ type Props = {
 type Point = { label: string; value: number };
 
 const DailyActiveUsersCard: React.FC<Props> = ({ range }) => {
+  const [isDark, setIsDark] = useState<boolean>(() => {
+    if (typeof document === "undefined") return false;
+    return document.documentElement.classList.contains("dark");
+  });
+
+  useEffect(() => {
+    if (typeof document === "undefined" || typeof MutationObserver === "undefined") return;
+    const obs = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains("dark"));
+    });
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    return () => obs.disconnect();
+  }, []);
+
   const { data, subtitle, value, change } = React.useMemo(() => {
     // Determine number of points for the selected range
     const points = (() => {
@@ -48,10 +62,20 @@ const DailyActiveUsersCard: React.FC<Props> = ({ range }) => {
       labels.push(`${d.getMonth() + 1}/${d.getDate()}`);
     }
 
-    // synthetic values (simple sine-ish + noise) for demo
+    // synthetic values (simple sine-ish + deterministic noise) for demo
+    const deterministicNoise = (seed: number) => {
+      // pure deterministic pseudo-random based on Math.sin
+      const r = Math.sin(seed * 12.9898) * 43758.5453;
+      return r - Math.floor(r);
+    };
+
     const generated: Point[] = labels.map((lbl, idx) => ({
       label: lbl,
-      value: Math.round(900 + Math.sin(idx / Math.max(3, points / 7)) * 400 + Math.random() * 200),
+      value: Math.round(
+        900 +
+          Math.sin(idx / Math.max(3, points / 7)) * 400 +
+          deterministicNoise(idx + points) * 200
+      ),
     }));
 
     // show current value as last point and change vs previous
@@ -105,12 +129,16 @@ const DailyActiveUsersCard: React.FC<Props> = ({ range }) => {
               tick={{ fontSize: 11, fill: "#9ca3af" }}
             />
             <Tooltip
-              cursor={{ stroke: "#e5e7eb", strokeWidth: 1 }}
+              cursor={{ stroke: isDark ? "#374151" : "#e5e7eb", strokeWidth: 1 }}
               contentStyle={{
                 borderRadius: 12,
-                border: "1px solid #e5e7eb",
-                boxShadow: "0 10px 25px rgba(15,23,42,0.08)",
+                border: isDark ? "1px solid #374151" : "1px solid #e5e7eb",
+                boxShadow: isDark
+                  ? "0 10px 25px rgba(2,6,23,0.6)"
+                  : "0 10px 25px rgba(15,23,42,0.08)",
                 fontSize: 12,
+                background: isDark ? "#0f1724" : undefined,
+                color: isDark ? "#e6eef8" : undefined,
               }}
             />
             <Line

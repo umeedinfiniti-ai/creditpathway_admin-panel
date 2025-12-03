@@ -53,7 +53,7 @@ const NewLessonModal: React.FC<Props> = ({
     if (!open && !initialValues) {
       reset();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [open, initialValues]);
 
   const handleSubmit = (e: React.FormEvent) => {

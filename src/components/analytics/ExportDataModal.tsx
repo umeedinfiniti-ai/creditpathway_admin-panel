@@ -29,8 +29,60 @@ const ExportDataModal: React.FC<Props> = ({
   const handleExport = async () => {
     try {
       setLoading(true);
-      // TODO: call your export API here
-      // await api.exportAnalytics({ range, format, includeUsers, ... });
+      // For CSV format, build a simple demo CSV client-side and download it.
+      if (format === "csv") {
+        const rows: string[] = [];
+
+        // header
+        rows.push(["dataset", "id", "label", "value"].join(","));
+
+        // Users & Membership (demo rows)
+        if (includeUsers) {
+          rows.push(["users", "u_1", "Total Users", "1420"].join(","));
+          rows.push(["users", "u_2", "Active Users", "893"].join(","));
+        }
+
+        // Disputes & Letters
+        if (includeDisputes) {
+          rows.push(["disputes", "d_1", "Open Disputes", "12"].join(","));
+          rows.push(["disputes", "d_2", "Letters Generated", "47"].join(","));
+        }
+
+        // Content Performance
+        if (includeContent) {
+          rows.push(["content", "c_1", "Top Article 1", "1200"].join(","));
+          rows.push(["content", "c_2", "Top Article 2", "980"].join(","));
+        }
+
+        // metadata row
+        rows.push(["", "", "range", range].join(","));
+
+        const csv = rows.join("\n");
+
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+        a.href = url;
+        a.download = `analytics-export-${range}-${timestamp}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+
+        // If an email was provided, you would call your backend API here
+        // to send the file to the email. For now we just log the intent.
+        if (email) {
+
+          console.log(`Would send export to ${email} (not implemented).`);
+        }
+
+        setLoading(false);
+        onClose();
+        return;
+      }
+
+      console.log("PDF export requested (not implemented)");
       setLoading(false);
       onClose();
     } catch (err) {

@@ -1,5 +1,11 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useMemo, useEffect, useState, useRef, useLayoutEffect } from "react";
+
+import React, {
+  useMemo,
+  useEffect,
+  useState,
+  useRef,
+  useLayoutEffect,
+} from "react";
 import SectionCard from "../shared/layout/SectionCard";
 import {
   AreaChart,
@@ -35,6 +41,7 @@ const UsageEngagementCard: React.FC<Props> = ({ dateRange }) => {
         return "Last 30 Days";
     }
   }, [dateRange]);
+
   // Demo data – you can branch on dateRange later if you want
   const data: UsagePoint[] = useMemo(
     () => [
@@ -49,10 +56,17 @@ const UsageEngagementCard: React.FC<Props> = ({ dateRange }) => {
     []
   );
 
-  const [isDark, setIsDark] = useState(false);
+  // Initialize from current document theme (if available)
+  const [isDark, setIsDark] = useState<boolean>(() => {
+    if (typeof document === "undefined") return false;
+    return document.documentElement.classList.contains("dark");
+  });
 
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+  const [containerSize, setContainerSize] = useState({
+    width: 0,
+    height: 0,
+  });
 
   useLayoutEffect(() => {
     const el = containerRef.current;
@@ -60,7 +74,10 @@ const UsageEngagementCard: React.FC<Props> = ({ dateRange }) => {
 
     const update = () => {
       const rect = el.getBoundingClientRect();
-      setContainerSize({ width: Math.max(0, Math.floor(rect.width)), height: Math.max(0, Math.floor(rect.height)) });
+      setContainerSize({
+        width: Math.max(0, Math.floor(rect.width)),
+        height: Math.max(0, Math.floor(rect.height)),
+      });
     };
 
     update();
@@ -70,29 +87,34 @@ const UsageEngagementCard: React.FC<Props> = ({ dateRange }) => {
   }, []);
 
   useEffect(() => {
-    try {
-      setIsDark(document.documentElement.classList.contains("dark"));
-      const obs = new MutationObserver(() => {
-        setIsDark(document.documentElement.classList.contains("dark"));
-      });
-      obs.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
-      return () => obs.disconnect();
-    } catch (e) {
-      // ignore
+    if (
+      typeof document === "undefined" ||
+      typeof MutationObserver === "undefined"
+    ) {
+      return;
     }
+
+    const obs = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains("dark"));
+    });
+
+    obs.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    return () => {
+      obs.disconnect();
+    };
   }, []);
 
   return (
     <SectionCard title="Usage & Engagement">
       <div className="mb-3 flex items-baseline gap-2">
-        <span className="text-2xl font-semibold text-gray-900">
-          893
-        </span>
+        <span className="text-2xl font-semibold text-gray-900">893</span>
         <span className="text-xs text-gray-500">
           {rangeLabel}{" "}
-          <span className="font-medium text-emerald-600">
-            +2.5%
-          </span>
+          <span className="font-medium text-emerald-600">+2.5%</span>
         </span>
       </div>
 
@@ -102,48 +124,64 @@ const UsageEngagementCard: React.FC<Props> = ({ dateRange }) => {
         style={{ minWidth: 0, minHeight: 220 }}
       >
         {containerSize.width > 0 && containerSize.height > 0 ? (
-          <ResponsiveContainer width="100%" height={Math.max(200, containerSize.height)}>
+          <ResponsiveContainer
+            width="100%"
+            height={Math.max(200, containerSize.height)}
+          >
             <AreaChart data={data} margin={{ left: -20, right: 0, top: 10 }}>
-            <defs>
-              <linearGradient id="usageFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#D4A317" stopOpacity={0.7} />
-                <stop offset="100%" stopColor="#FDF5DF" stopOpacity={0.1} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid
-              stroke={isDark ? "#1f2937" : "#f3f4f6"}
-              vertical={false}
-              strokeDasharray="3 3"
-            />
-            <XAxis
-              dataKey="label"
-              tickLine={false}
-              axisLine={false}
-              tick={{ fontSize: 11, fill: isDark ? "#94a3b8" : "#9ca3af" }}
-            />
-            <YAxis
-              tickLine={false}
-              axisLine={false}
-              tick={{ fontSize: 11, fill: isDark ? "#94a3b8" : "#9ca3af" }}
-            />
-            <Tooltip
-              cursor={{ stroke: isDark ? "#374151" : "#e5e7eb", strokeWidth: 1 }}
-              contentStyle={{
-                borderRadius: 12,
-                border: isDark ? "1px solid #374151" : "1px solid #e5e7eb",
-                boxShadow: isDark ? "0 10px 25px rgba(2,6,23,0.6)" : "0 10px 25px rgba(15,23,42,0.08)",
-                fontSize: 12,
-                background: isDark ? "#0f1724" : undefined,
-                color: isDark ? "#e6eef8" : undefined,
-              }}
-            />
-            <Area
-              type="monotone"
-              dataKey="value"
-              stroke="#D4A317"
-              strokeWidth={2.4}
-              fill="url(#usageFill)"
-            />
+              <defs>
+                <linearGradient id="usageFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#D4A317" stopOpacity={0.7} />
+                  <stop offset="100%" stopColor="#FDF5DF" stopOpacity={0.1} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid
+                stroke={isDark ? "#1f2937" : "#f3f4f6"}
+                vertical={false}
+                strokeDasharray="3 3"
+              />
+              <XAxis
+                dataKey="label"
+                tickLine={false}
+                axisLine={false}
+                tick={{
+                  fontSize: 11,
+                  fill: isDark ? "#94a3b8" : "#9ca3af",
+                }}
+              />
+              <YAxis
+                tickLine={false}
+                axisLine={false}
+                tick={{
+                  fontSize: 11,
+                  fill: isDark ? "#94a3b8" : "#9ca3af",
+                }}
+              />
+              <Tooltip
+                cursor={{
+                  stroke: isDark ? "#374151" : "#e5e7eb",
+                  strokeWidth: 1,
+                }}
+                contentStyle={{
+                  borderRadius: 12,
+                  border: isDark
+                    ? "1px solid #374151"
+                    : "1px solid #e5e7eb",
+                  boxShadow: isDark
+                    ? "0 10px 25px rgba(2,6,23,0.6)"
+                    : "0 10px 25px rgba(15,23,42,0.08)",
+                  fontSize: 12,
+                  background: isDark ? "#0f1724" : undefined,
+                  color: isDark ? "#e6eef8" : undefined,
+                }}
+              />
+              <Area
+                type="monotone"
+                dataKey="value"
+                stroke="#D4A317"
+                strokeWidth={2.4}
+                fill="url(#usageFill)"
+              />
             </AreaChart>
           </ResponsiveContainer>
         ) : (

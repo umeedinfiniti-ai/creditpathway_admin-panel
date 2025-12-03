@@ -17,8 +17,8 @@ const Topbar: React.FC<TopbarProps> = ({ pageTitle, onOpenSidebar }) => {
       // avoid hook error if AuthProvider isn't mounted
       // eslint-disable-next-line react-hooks/rules-of-hooks
       return useAuth();
-    } catch (e) {
-      return { user: null } as any;
+    } catch {
+      return { user: null } as ReturnType<typeof useAuth>;
     }
   })();
 

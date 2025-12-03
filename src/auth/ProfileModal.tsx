@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Modal from "../components/shared/overlay/Modal";
 import { useAuth } from "./AuthProvider";
 import TextInput from "../components/shared/inputs/TextInput";
@@ -11,11 +11,14 @@ type Props = {
 
 const ProfileModal: React.FC<Props> = ({ open, onClose }) => {
   const { user, updateProfile } = useAuth();
-  const [email, setEmail] = useState(user?.email ?? "");
 
-  useEffect(() => {
+  const [email, setEmail] = useState<string>(() => user?.email ?? "");
+
+  const handleCancel = () => {
+    // Reset back to the latest user email when closing
     setEmail(user?.email ?? "");
-  }, [user, open]);
+    onClose();
+  };
 
   const handleSave = () => {
     updateProfile({ email });
@@ -23,11 +26,25 @@ const ProfileModal: React.FC<Props> = ({ open, onClose }) => {
   };
 
   return (
-    <Modal isOpen={open} onClose={onClose} title="Profile Settings" size="sm">
+    <Modal
+      isOpen={open}
+      onClose={handleCancel}
+      title="Profile Settings"
+      size="sm"
+    >
       <div className="space-y-3">
-        <TextInput label="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        <TextInput
+          label="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
         <div className="flex justify-end gap-2">
-          <Button variant="secondary" size="sm" type="button" onClick={onClose}>
+          <Button
+            variant="secondary"
+            size="sm"
+            type="button"
+            onClick={handleCancel}
+          >
             Cancel
           </Button>
           <Button size="sm" type="button" onClick={handleSave}>

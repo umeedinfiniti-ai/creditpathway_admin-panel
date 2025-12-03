@@ -3,7 +3,7 @@ import SectionCard from "../shared/layout/SectionCard";
 import TableToolbar from "../shared/table/TableToolbar";
 import SearchInput from "../shared/inputs/SearchInput";
 import DataTable, { type Column } from "../shared/table/DataTable";
-import Button from "../shared/buttons/Button";
+
 
 export type SupportTicket = {
   id: string;
@@ -46,9 +46,6 @@ const SupportTicketsTable: React.FC<Props> = ({ tickets, search, onSearchChange,
         search={
           <SearchInput placeholder="Search subject or user..." value={search} onChange={(e) => onSearchChange(e.target.value)} />
         }
-        right={(
-          <Button size="sm">Export</Button>
-        )}
       />
 
       <DataTable columns={columns} data={tickets} getRowId={(r) => r.id} onRowClick={onRowClick} hover />
