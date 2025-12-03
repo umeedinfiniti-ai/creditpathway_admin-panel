@@ -229,12 +229,14 @@ const SupportPage: React.FC = () => {
       />
 
       <SupportTicketModal
+        key="create"
         open={createOpen}
         mode="create"
         onClose={() => setCreateOpen(false)}
         onSubmit={handleCreate}
       />
       <SupportTicketModal
+        key={editing?.id ?? "edit"}
         open={editOpen}
         mode="edit"
         initialValues={editing || undefined}
@@ -245,6 +247,7 @@ const SupportPage: React.FC = () => {
         onSubmit={handleEdit}
       />
     </div>
+    
   );
 };
 
