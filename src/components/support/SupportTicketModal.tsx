@@ -71,14 +71,13 @@ const SupportTicketModal: React.FC<Props> = ({
             ...messages,
             {
               id: Date.now().toString(),
-              author: "Support",
+              author: "Support", // admin side
               text: trimmed,
               date: new Date().toISOString().slice(0, 10),
             },
           ]
         : messages;
 
-    // ✅ use the setter so ESLint is happy and UI updates immediately
     setMessages(nextMessages);
     setReplyText("");
 
@@ -92,14 +91,14 @@ const SupportTicketModal: React.FC<Props> = ({
       setValues((prev) => ({ ...prev, [field]: v }));
     };
 
-  const title = mode === "create" ? "Create Support Ticket" : "Edit Ticket";
+  const title = mode === "create" ? "Create Support Ticket" : "Support Chat";
 
   return (
     <Modal
       isOpen={open}
       onClose={onClose}
       title={title}
-      size="md"
+      size="lg"
       footer={
         <>
           <Button
@@ -108,27 +107,63 @@ const SupportTicketModal: React.FC<Props> = ({
             type="button"
             onClick={onClose}
           >
-            Cancel
+            Close
           </Button>
           <Button size="sm" type="button" onClick={handleSave}>
-            Save
+            {mode === "create" ? "Save Ticket" : "Send & Save"}
           </Button>
         </>
       }
     >
-      <form className="space-y-3">
-        <TextInput
-          label="Subject"
-          value={values.subject || ""}
-          onChange={handleChange("subject")}
-        />
-        <TextInput
-          label="User"
-          value={values.user || ""}
-          onChange={handleChange("user")}
-        />
+      <form className="space-y-4">
+        {/* Ticket meta – similar to app header (advisor info) */}
+        <div className="rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-900">
+          <div className="flex items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                Conversation with
+              </div>
+              <div className="text-sm font-semibold text-gray-900 dark:text-gray-50">
+                {values.user || "Unknown user"}
+              </div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">
+                {values.subject || "No subject"}
+              </div>
+            </div>
+            <div className="flex flex-col items-end gap-2">
+              <div className="flex gap-2">
+                <span className="inline-flex items-center rounded-full bg-gray-900 px-3 py-1 text-xs font-medium capitalize text-white dark:text-gray-900">
+                  {values.status || "open"}
+                </span>
+                <span className="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-medium capitalize text-amber-800 dark:bg-amber-900/40 dark:text-amber-200">
+                  {values.priority || "medium"}
+                </span>
+              </div>
+              {/* future: wire this to a schedule-call flow */}
+              <Button
+                type="button"
+                // size="xs"
+                variant="secondary"
+                className="rounded-full"
+              >
+                Schedule a Call
+              </Button>
+            </div>
+          </div>
+        </div>
 
-        <div className="grid grid-cols-2 gap-2">
+        {/* Basic editable fields */}
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          <TextInput
+            label="Subject"
+            value={values.subject || ""}
+            onChange={handleChange("subject")}
+          />
+          <TextInput
+            label="User (email)"
+            value={values.user || ""}
+            onChange={handleChange("user")}
+          />
           <div className="space-y-1">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
               Status
@@ -168,51 +203,87 @@ const SupportTicketModal: React.FC<Props> = ({
               ]}
             />
           </div>
+
+          <TextInput
+            label="Assigned To"
+            value={values.assignedTo || ""}
+            onChange={handleChange("assignedTo")}
+          />
+          <TextInput
+            label="Summary / Internal Note"
+            value={values.message || ""}
+            onChange={handleChange("message")}
+          />
         </div>
 
-        <TextInput
-          label="Assigned To"
-          value={values.assignedTo || ""}
-          onChange={handleChange("assignedTo")}
-        />
-        <TextInput
-          label="Message"
-          value={values.message || ""}
-          onChange={handleChange("message")}
-        />
-
+        {/* Chatroom like the app UI */}
         {mode === "edit" && (
           <div className="space-y-3">
-            <div className="text-sm font-medium text-gray-700 dark:text-gray-200">
-              Conversation
-            </div>
-            <div className="max-h-40 overflow-y-auto rounded-lg border border-gray-200 bg-white p-3 pr-4 text-sm text-gray-800 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200">
-              {messages && messages.length > 0 ? (
-                messages.map((m) => (
-                  <div key={m.id} className="mb-3">
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
-                      {m.author} • {m.date}
-                    </div>
-                    <div className="mt-1 text-sm">{m.text}</div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-xs text-gray-500">No messages yet.</div>
-              )}
+            <div className="flex items-center justify-between">
+              <div className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                Messages – Chatroom
+              </div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">
+                Replies from you will appear in the app chat.
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-                Reply
-              </label>
-              <textarea
-                value={replyText}
-                onChange={(e) => setReplyText(e.target.value)}
-                className="mt-1 block w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 placeholder-gray-400 shadow-sm focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
-                rows={3}
-              />
-              <div className="mt-2 text-right text-xs text-gray-500">
-                (Reply will be saved when you click Save)
+            <div className="flex h-80 flex-col rounded-2xl border border-gray-100 bg-white p-3 pr-4 text-sm text-gray-800 shadow-sm dark:border-gray-800 dark:bg-gray-950 dark:text-gray-100">
+              {/* scrollable conversation */}
+              <div className="flex-1 space-y-3 overflow-y-auto bg-transparent pr-1 dark:bg-transparent">
+                {messages && messages.length > 0 ? (
+                  messages.map((m) => {
+                    const isUser = m.author === values.user;
+                    return (
+                      <div
+                        key={m.id}
+                        className={`flex ${
+                          isUser ? "justify-start" : "justify-end"
+                        }`}
+                      >
+                        <div className="max-w-[75%] space-y-1">
+                          <div
+                            className={`inline-flex w-full flex-col rounded-2xl px-3 py-2 text-sm shadow-sm ${
+                              isUser
+                                ? "bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-50"
+                                : "bg-gray-900 text-white  dark:text-gray-900"
+                            }`}
+                          >
+                            <span>{m.text}</span>
+                          </div>
+                          <div className="text-[11px] text-gray-400 dark:text-gray-500">
+                            {isUser ? "Customer" : "You"} • {m.date}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="mt-4 text-center text-xs text-gray-500 dark:text-gray-500">
+                    No messages yet. Start the conversation below.
+                  </div>
+                )}
+              </div>
+
+              {/* composer – like the app input */}
+              <div className="mt-3 border-t border-gray-100 pt-3 dark:border-gray-800">
+                <div className="flex items-end gap-2">
+                  <textarea
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                    className="min-h-[42px] max-h-24 flex-1 resize-none rounded-2xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800 outline-none placeholder-gray-400 focus:border-gray-400 focus:bg-white focus:ring-2 focus:ring-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder-gray-500 dark:focus:border-gray-600 dark:focus:ring-gray-700"
+                    placeholder="Type your reply here…"
+                    rows={2}
+                  />
+                  <Button
+                    size="sm"
+                    type="button"
+                    onClick={handleSave}
+                    disabled={!replyText.trim()}
+                  >
+                    Send
+                  </Button>
+                </div>
               </div>
             </div>
           </div>

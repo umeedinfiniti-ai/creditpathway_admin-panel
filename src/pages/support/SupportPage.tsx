@@ -122,6 +122,7 @@ const SupportPage: React.FC = () => {
     setCreateOpen(false);
   };
 
+  // 🔁 Edit keeps modal open so admin can chat multiple times
   const handleEdit = (vals: TicketValues) => {
     if (!editing) return;
     setTickets((prev) =>
@@ -132,12 +133,13 @@ const SupportPage: React.FC = () => {
           ...vals,
           status: vals.status ?? t.status,
           priority: vals.priority ?? t.priority,
+          message: vals.message ?? t.message,
+          messages: vals.messages ?? t.messages,
           lastUpdated: new Date().toISOString().slice(0, 10),
         };
       })
     );
-    setEditing(null);
-    setEditOpen(false);
+    // do NOT close the modal here; user can keep chatting
   };
 
   const onEditClick = (t: SupportTicket) => {
@@ -146,7 +148,7 @@ const SupportPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-gray-900 dark:text-gray-100">
       <PageHeader
         title="Support"
         description="Customer support tickets and workflows."
@@ -159,7 +161,6 @@ const SupportPage: React.FC = () => {
               onClick={async () => {
                 setIsExporting(true);
                 try {
-                  // build CSV from current filtered tickets
                   const header = [
                     "id",
                     "subject",
@@ -172,7 +173,6 @@ const SupportPage: React.FC = () => {
                   ];
                   const rows: string[] = [header.join(",")];
 
-                  // Use `filtered` so export respects search
                   for (const t of filtered) {
                     const row = [
                       t.id,
@@ -188,7 +188,9 @@ const SupportPage: React.FC = () => {
                   }
 
                   const csv = rows.join("\n");
-                  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+                  const blob = new Blob([csv], {
+                    type: "text/csv;charset=utf-8;",
+                  });
                   const url = URL.createObjectURL(blob);
                   const a = document.createElement("a");
                   const ts = new Date().toISOString().replace(/[:.]/g, "-");
@@ -199,7 +201,6 @@ const SupportPage: React.FC = () => {
                   a.remove();
                   URL.revokeObjectURL(url);
                 } catch (err) {
-             
                   console.error("Failed to export tickets:", err);
                 } finally {
                   setIsExporting(false);
@@ -210,9 +211,7 @@ const SupportPage: React.FC = () => {
               {isExporting ? "Exporting…" : "Export"}
             </Button>
 
-            <Button size="sm" onClick={() => setCreateOpen(true)}>
-              Create Ticket
-            </Button>
+         
           </div>
         }
       />
@@ -247,7 +246,6 @@ const SupportPage: React.FC = () => {
         onSubmit={handleEdit}
       />
     </div>
-    
   );
 };
 
