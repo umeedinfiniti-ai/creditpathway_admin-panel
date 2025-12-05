@@ -10,6 +10,7 @@ export interface ButtonProps
   size?: ButtonSize;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
+  fullWidth?: boolean;
 }
 
 const variantClasses: Record<ButtonVariant, string> = {
@@ -34,12 +35,18 @@ const Button: React.FC<ButtonProps> = ({
   leftIcon,
   rightIcon,
   className,
+  fullWidth = false,
   ...props
 }) => {
+  const displayClass = fullWidth
+    ? "flex w-full items-center justify-center"
+    : "inline-flex items-center justify-center";
+
   return (
     <button
       className={cn(
-        "inline-flex items-center justify-center font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#D4A317] focus-visible:ring-offset-[#F7F5F1] dark:focus-visible:ring-offset-gray-900",
+        displayClass +
+          " font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#D4A317] focus-visible:ring-offset-[#F7F5F1] dark:focus-visible:ring-offset-gray-900",
         variantClasses[variant],
         sizeClasses[size],
         className

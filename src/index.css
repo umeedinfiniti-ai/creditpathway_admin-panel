@@ -2,12 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Dark-mode global text color
-	 This rule ensures most textual elements appear white when the `dark`
-	 class is present on the <html> element. It uses higher specificity so
-	 it overrides utility classes like `text-gray-700` for better readability.
-	 If you want finer control (preserve colored badges, etc.), tell me which
-	 elements to exclude and I can refine these rules. */
+
 html.dark h1,
 html.dark h2,
 html.dark h3,
@@ -33,10 +28,7 @@ html.dark table {
 	color: rgba(255,255,255,0.9) !important;
 }
 
-/* Style native select dropdowns in dark mode where supported by the browser.
-	 Note: some browsers/platforms ignore `<option>` background styling. This
-	 improves appearance on most desktop browsers and provides a fallback where
-	 possible. */
+
 html.dark select,
 html.dark select option {
 	background-color: #0f1724; /* near-gray-900 */
@@ -78,3 +70,7 @@ html.dark select::-ms-expand {
 }
 
 
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}

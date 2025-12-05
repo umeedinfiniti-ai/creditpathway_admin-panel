@@ -4,9 +4,12 @@ const Logo: React.FC<{ large?: boolean }> = ({ large = false }) => {
   const sizeClass = large ? "w-64 h-auto" : "w-36 h-auto";
   const [imageOk, setImageOk] = useState(true);
 
-  // Prefer an image placed in the `public/` folder named `paramount-logo.png`.
-  // If it fails to load, we gracefully fall back to the inline SVG.
-  const imgSrc = "/paramount-logo.png";
+  // Prefer the provided banner image `paramount-banner.png` in `public/`.
+  // Fall back to the existing `logo1.png` and finally to the inline SVG.
+  // To display your attached banner, add it to `public/paramount-banner.png`.
+  const preferred = "/paramount-banner.png";
+  const fallback = "/logo1.png";
+  const imgSrc = preferred;
 
   return (
     <div className={`flex items-center gap-4 ${sizeClass}`}>
@@ -14,8 +17,15 @@ const Logo: React.FC<{ large?: boolean }> = ({ large = false }) => {
         <img
           src={imgSrc}
           alt="Paramount logo"
-          className="object-contain inline-block max-h-20 rounded"
-          onError={() => setImageOk(false)}
+          className={`object-contain inline-block ${large ? 'max-h-28' : 'max-h-20'} rounded`}
+          onError={(e) => {
+            // if preferred failed, try fallback once before showing SVG
+            if ((e.currentTarget as HTMLImageElement).src.endsWith(preferred)) {
+              (e.currentTarget as HTMLImageElement).src = fallback;
+            } else {
+              setImageOk(false);
+            }
+          }}
         />
       ) : (
         <svg
@@ -35,10 +45,7 @@ const Logo: React.FC<{ large?: boolean }> = ({ large = false }) => {
         </svg>
       )}
 
-      <div className="flex flex-col">
-        <span className="font-serif text-2xl text-gray-900 dark:text-gray-100">Paramount</span>
-        <span className="text-xs text-gray-500 dark:text-gray-300">Credit Pathway</span>
-      </div>
+
     </div>
   );
 };
