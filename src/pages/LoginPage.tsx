@@ -46,7 +46,7 @@ const LoginPage: FC = () => {
                   <Logo />
                 </div>
 
-                <div>
+                <div className="self-center ml-6 text-center">
                   <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                     Sign in
                   </h1>
