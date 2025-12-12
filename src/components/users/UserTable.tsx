@@ -12,7 +12,7 @@ import StatusBadge from "../shared/data-display/StatusBadge";
 import { cn } from "../../utils/cn";
 
 export type UserStatus = "active" | "inactive";
-export type UserTier = "Gold" | "Silver" | "Bronze";
+export type UserTier = "Core" | "Advantage" | "Pro";
 
 export type User = {
   id: string;
@@ -139,9 +139,9 @@ const UserTable: React.FC<Props> = ({
                 onTierFilterChange((val as UserTier) || "all")
               }
               options={[
-                { value: "Gold", label: "Gold" },
-                { value: "Silver", label: "Silver" },
-                { value: "Bronze", label: "Bronze" },
+                { value: "Core", label: "Core" },
+                { value: "Advantage", label: "Advantage" },
+                { value: "Pro", label: "Pro" },
               ]}
               placeholder="Tier"
             />

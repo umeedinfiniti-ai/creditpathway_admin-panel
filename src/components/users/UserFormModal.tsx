@@ -35,7 +35,7 @@ const UserFormModal: React.FC<Props> = ({
   const [values, setValues] = useState<UserFormValues>({
     name: "",
     email: "",
-    tier: "Gold",
+    tier: "Core",
     status: "active",
     phone: "",
     address: "",
@@ -63,7 +63,7 @@ const UserFormModal: React.FC<Props> = ({
       setValues({
         name: "",
         email: "",
-        tier: "Gold",
+        tier: "Core",
         status: "active",
         phone: "",
         address: "",
@@ -172,13 +172,13 @@ const UserFormModal: React.FC<Props> = ({
               onChange={(val) =>
                 setValues((prev) => ({
                   ...prev,
-                  tier: (val as UserTier) || "Gold",
+                    tier: (val as UserTier) || "Core",
                 }))
               }
               options={[
-                { value: "Gold", label: "Gold" },
-                { value: "Silver", label: "Silver" },
-                { value: "Bronze", label: "Bronze" },
+                { value: "Core", label: "Core" },
+                { value: "Advantage", label: "Advantage" },
+                { value: "Pro", label: "Pro" },
               ]}
               placeholder="Select tier"
               className="w-full"
